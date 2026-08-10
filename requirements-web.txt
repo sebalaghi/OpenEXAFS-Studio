@@ -1,0 +1,7 @@
+numpy>=1.26
+matplotlib>=3.8
+xraylarch>=2026.2.2
+pymatgen
+larixite
+streamlit>=1.40
+pandas>=2.2

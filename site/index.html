@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>OpenEXAFS Studio</title>
+  <meta name="description" content="Open-source EXAFS GUI using XrayLarch and Feff8L">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <span class="badge">Open-source EXAFS workflow</span>
+      <h1>OpenEXAFS Studio</h1>
+      <p class="lead">CIF / structure <span>→</span> Feff8L <span>→</span> XrayLarch path modeling <span>→</span> FEFFIT</p>
+      <div class="actions">
+        <a class="primary" href="https://github.com/sebalaghi/OpenEXAFS-Studio">View on GitHub</a>
+        <a href="https://github.com/sebalaghi/OpenEXAFS-Studio/archive/refs/heads/main.zip">Download source</a>
+        <a href="https://share.streamlit.io/">Deploy browser edition</a>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article><h2>Structure to Feff</h2><p>Load CIF/structure files, choose absorber site and edge, generate an editable Feff8L input, and run a conventional EXAFS calculation.</p></article>
+      <article><h2>Path browser</h2><p>Inspect degeneracy, Reff, geometry, NLEG, and filter single or multiple scattering paths.</p></article>
+      <article><h2>k and R-space preview</h2><p>Plot chi(k), k-weighted spectra through k³, and complex Fourier-transform components. Export CSV and publication figures.</p></article>
+      <article><h2>Larch FEFFIT</h2><p>Load experimental XAS, process with Larch pre_edge/autobk/xftf, and fit selected FEFF paths in R space.</p></article>
+    </section>
+
+    <section class="note">
+      <h2>Scientific scope</h2>
+      <p>Feff8L is used here as an EXAFS engine. This project does not redistribute FEFF9 and does not claim Feff8L as a full FEFF9 XANES replacement.</p>
+    </section>
+
+    <footer>OpenEXAFS Studio · Python · XrayLarch · Feff8L</footer>
+  </main>
+</body>
+</html>

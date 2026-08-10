@@ -1,0 +1,15 @@
+OpenEXAFS Studio v0.2.1
+
+Windows desktop:
+  First install / repair: INSTALL_AND_RUN.bat
+  Normal launch:          RUN_GUI.bat
+  Diagnostic:             DIAGNOSTIC.bat
+
+GitHub publishing:
+  PUBLISH_TO_GITHUB.bat
+
+v0.2.1 fixes the GitHub publishing bug where a missing remote repository was
+mistaken for an existing one. The publisher now checks the GitHub CLI exit code,
+creates OpenEXAFS-Studio when it does not exist, creates or repairs the local
+origin remote, pushes main, enables GitHub Pages when possible, and triggers the
+Pages workflow.

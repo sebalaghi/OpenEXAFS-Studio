@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openexafs-studio"
+version = "0.2.1"
+description = "Professional open-source EXAFS GUI using XrayLarch and the Feff8L engine"
+readme = "README.md"
+requires-python = ">=3.11,<3.15"
+license = {text = "MIT"}
+authors = [{name = "S. Esmael Balaghi"}]
+keywords = ["EXAFS", "XAS", "XrayLarch", "FEFF", "Feff8L", "FEFFIT"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Chemistry",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+  "numpy>=1.26",
+  "matplotlib>=3.8",
+  "PySide6>=6.7",
+  "xraylarch>=2026.2.2",
+  "pymatgen",
+  "larixite",
+]
+
+[project.optional-dependencies]
+web = ["streamlit>=1.40", "pandas>=2.2"]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+openexafs-studio = "openexafs_studio.main_window:main"
+
+[tool.setuptools.packages.find]
+include = ["openexafs_studio*"]
+
+[tool.ruff]
+line-length = 120

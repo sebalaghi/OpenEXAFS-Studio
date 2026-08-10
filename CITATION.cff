@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use OpenEXAFS Studio, please cite the software and the upstream XrayLarch/FEFF methods."
+title: "OpenEXAFS Studio"
+type: software
+authors:
+  - family-names: "Balaghi"
+    given-names: "S. Esmael"
+version: "0.1.0"
+date-released: "2026-08-10"
+repository-code: "https://github.com/sebalaghi/OpenEXAFS-Studio"
+license: MIT
