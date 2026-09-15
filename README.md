@@ -39,14 +39,20 @@ feff0002.dat
 ARTEMIS_IMPORT.txt
 ```
 
-Then in Artemis:
+Then in Artemis 0.9.26:
 
-1. Extract the ZIP if needed.
-2. Choose **File -> Import... -> a feff.inp file**.
-3. Select the exported `feff.inp`.
-4. Keep all `feffNNNN.dat` files in the same folder.
+1. Run `ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1` once on the Artemis installation and restart Artemis.
+2. Extract the OpenEXAFS Studio ZIP if needed.
+3. Choose **File -> Import... -> an external Feff calculation**.
+4. Select the exported `feff.inp`.
+5. Accept Artemis' external-FEFF warning.
+6. Do **not** click **Run Feff**. Artemis should build the path list from the existing `feffNNNN.dat` files.
 
-The numerical scattering-path files are the original Feff8L outputs.
+The script only exposes an external-FEFF importer that already exists in Demeter 0.9.26 source code.
+It also adds the missing runtime load of `Demeter::Feff::External`. A timestamped backup of every
+modified Artemis file is created before editing.
+
+The numerical scattering-path files remain the original Feff8L outputs.
 
 Bruce Ravel has noted that externally generated `feffNNNN.dat` files can be used by Artemis
 independently of the FEFF version because the relevant path-file format did not change between
