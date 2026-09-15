@@ -2,40 +2,41 @@
 
 ## Engine boundary
 
-OpenEXAFS Studio uses Feff8L for EXAFS path calculations. Feff8L is not the full FEFF9 code and is not
-intended here for full XANES multiple-scattering calculations.
+OpenEXAFS Studio uses Feff8L for EXAFS scattering-path calculations. Feff8L is not the full FEFF9
+code and is not intended here for full XANES multiple-scattering calculations.
+
+## Scope of this project
+
+The application intentionally stops before quantitative EXAFS fitting. Its job is to:
+
+1. build a FEFF8-style input from a structure,
+2. run Feff8L,
+3. inspect and preview the generated scattering paths,
+4. export the original Feff8L path files for Artemis.
+
+This avoids maintaining a second fitting implementation when Artemis is already a mature fitting
+environment.
 
 ## Single scattering
 
 The GUI classifies a path as single scattering when `NLEG == 2`, matching FEFF path convention.
 
-## Delta E0 default
+## Path preview
 
-Raw path preview uses Delta E0 = 0 eV by default. A nonzero value without experimental edge alignment
-would be arbitrary. Delta E0 can be adjusted for preview and is normally refined during FEFFIT.
+Preview parameters such as S0^2, Delta E0, Delta R, and sigma^2 are visualization controls only.
+They do not represent a fitted model.
 
-## R-prime versus R-path
+## Artemis compatibility
 
-The radial coordinate of an uncorrected FT-EXAFS magnitude is an apparent coordinate, often written
-R-prime. It is shifted by absorber/scatterer photoelectron phase shifts. FEFFIT evaluates the full FEFF
-complex scattering function, and a fitted path distance can be reported as `Reff + Delta R`. This fitted
-path distance should not be confused with an uncorrected FT peak position.
+The Artemis export preserves the original Feff8L `feffNNNN.dat` files. It also includes
+`feff.inp` and available FEFF metadata such as `paths.dat`, `files.dat`, `list.dat`, and
+`phase.bin`.
 
-## Path fitting
+The exported path files are not converted to FEFF6.
 
-The built-in fitting page intentionally starts with a transparent parameterization:
-
-- one global S0^2,
-- one global Delta E0,
-- one path degeneracy N per selected path when enabled,
-- one Delta R per selected path,
-- one sigma^2 per selected path.
-
-The GUI defaults to fitting path degeneracy N while keeping S0^2 fixed. This is intended for cases where S0^2 has been calibrated independently. Simultaneously varying N and S0^2 is strongly correlated and should normally be avoided.
-
-For publication-quality analysis, reduce parameter count according to chemical symmetry, calibrate or
-fix S0^2 when justified, inspect correlations and independent-point limits, compare alternative path
-models, and document parameter bounds.
+Historically, Artemis developer Bruce Ravel stated that externally generated `feffNNNN.dat` files
+can be imported independently of the FEFF version because the relevant path-file format did not
+change between FEFF6 and FEFF8.
 
 ## References
 
