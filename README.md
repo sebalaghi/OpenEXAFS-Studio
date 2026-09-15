@@ -39,24 +39,92 @@ feff0002.dat
 ARTEMIS_IMPORT.txt
 ```
 
-Then in Artemis 0.9.26:
+### First-time Artemis setup on Windows
 
-1. Run `ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1` once on the Artemis installation and restart Artemis.
-2. Extract the OpenEXAFS Studio ZIP if needed.
-3. Choose **File -> Import... -> an external Feff calculation**.
-4. Select the exported `feff.inp`.
-5. Accept Artemis' external-FEFF warning.
-6. Do **not** click **Run Feff**. Artemis should build the path list from the existing `feffNNNN.dat` files.
+This is currently tested with **Artemis / Demeter 0.9.26**.
 
-The script only exposes an external-FEFF importer that already exists in Demeter 0.9.26 source code.
-It also adds the missing runtime load of `Demeter::Feff::External`. A timestamped backup of every
-modified Artemis file is created before editing.
+Artemis already contains an external-FEFF import mechanism, but in the standard 0.9.26 GUI it is not exposed for this FEFF8L workflow. OpenEXAFS Studio therefore includes a small compatibility patch:
 
-The numerical scattering-path files remain the original Feff8L outputs.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1
+```
 
-Bruce Ravel has noted that externally generated `feffNNNN.dat` files can be used by Artemis
-independently of the FEFF version because the relevant path-file format did not change between
-FEFF6 and FEFF8.
+Before running it:
+
+1. Close Artemis completely.
+2. Open PowerShell in the OpenEXAFS Studio repository folder.
+3. Run the command above.
+4. Restart Artemis.
+
+The script creates timestamped backups of every Artemis/Demeter file it modifies.
+
+### Importing a FEFF8L calculation into Artemis
+
+1. In OpenEXAFS Studio, run Feff8L normally.
+2. Open **Artemis export**.
+3. Choose **Export Artemis folder** or **Export Artemis ZIP**.
+4. If you exported a ZIP, extract it to a normal local folder.
+5. Start Artemis.
+6. Choose **File -> Import... -> an external Feff calculation**.
+7. Select the exported **`feff.inp`**.
+8. Accept Artemis' warning about importing an external FEFF calculation.
+9. Open the **Paths** tab. The table should be populated from the existing FEFF8L `feffNNNN.dat` files.
+10. Select one or more paths and use them in Artemis as usual.
+
+### Important
+
+Do **not** use:
+
+- **File -> Import... -> a feffit.inp file**
+- the normal Artemis **Run Feff** button for this imported calculation
+
+Those routes are not the FEFF8L handoff described here.
+
+The intended workflow is:
+
+```text
+Structure
+  -> OpenEXAFS Studio
+  -> Feff8L
+  -> original feffNNNN.dat files
+  -> Artemis external FEFF import
+  -> Artemis fitting
+```
+
+OpenEXAFS Studio does not convert the paths to FEFF6. The numerical scattering-path files remain the original Feff8L outputs.
+
+### If the Paths table is empty
+
+Check the following:
+
+- You used **an external Feff calculation**, not **a feff.inp file**.
+- You ran the latest `ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1` after updating the repository.
+- Artemis was closed while the patch was applied.
+- The exported folder still contains the original `feffNNNN.dat` files.
+- You restarted Artemis after applying the patch.
+
+If needed, update OpenEXAFS Studio and re-run the patch:
+
+```powershell
+git pull
+pip install -e .
+powershell -ExecutionPolicy Bypass -File .\ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1
+```
+
+### If Artemis freezes when plotting a raw path
+
+Older Artemis 0.9.26 code may try to regenerate an external path instead of reading the existing FEFF8L file. The current OpenEXAFS Studio patch modifies this behavior so Artemis plots directly from the original `feffNNNN.dat`.
+
+If plotting still locks:
+
+1. Close Artemis.
+2. Run `git pull`.
+3. Re-run `ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1`.
+4. Restart Artemis.
+5. Import the calculation again.
+6. Test plotting with a single path first.
+
+Bruce Ravel has documented the use of externally generated `feffNNNN.dat` files in Demeter by explicitly supplying the external file and folder.
 
 ## Quick start on Windows
 
