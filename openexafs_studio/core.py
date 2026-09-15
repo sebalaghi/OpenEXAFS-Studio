@@ -382,15 +382,13 @@ class OpenFeffEngine:
 
     def validate_artemis_run(self) -> tuple[bool, str]:
         inp = self.run_dir / "feff.inp"
-        phase = self.run_dir / "phase.bin"
         paths = sorted(self.run_dir.glob("feff[0-9][0-9][0-9][0-9].dat"))
         if not inp.is_file():
             return False, "Missing feff.inp."
-        if not phase.is_file():
-            return False, "Missing phase.bin, which Artemis external-FEFF import requires."
         if not paths:
             return False, "No feffNNNN.dat scattering-path files were found."
-        return True, f"External-Artemis package ready: feff.inp, phase.bin, and {len(paths)} FEFF8 path files."
+        phase_note = "phase.bin present" if (self.run_dir / "phase.bin").is_file() else "no phase.bin (normal for current Feff8L; Artemis patch handles this)"
+        return True, f"External-Artemis package ready: feff.inp, {len(paths)} FEFF8 path files, {phase_note}."
 
     def _synthetic_files_dat(self) -> str:
         paths = sorted(self.run_dir.glob("feff[0-9][0-9][0-9][0-9].dat"))
@@ -418,6 +416,9 @@ class OpenFeffEngine:
             "2. Select feff.inp from this folder.\n"
             "3. Accept the Artemis warning about external FEFF calculations.\n"
             "4. Artemis should build its path list from the existing feffNNNN.dat files.\n\n"
+            "Current Feff8L commonly writes phase.pad rather than the legacy FEFF6-style phase.bin. "
+            "The supplied Artemis patch therefore relaxes Demeter's external-import phase.bin check; "
+            "the actual fitting theory is read from the existing feffNNNN.dat path files.\n\n"
             "The feffNNNN.dat files are the original Feff8L outputs. OpenEXAFS Studio does "
             "not convert them to FEFF6 and does not ask Artemis to recalculate them.\n"
         )
