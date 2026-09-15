@@ -26,8 +26,10 @@ Fourier-transform components. Preview parameters are for visualization only.</p>
 the original Feff8L <code>feff.inp</code>, available FEFF metadata files, and all
 <code>feffNNNN.dat</code> files. OpenEXAFS Studio does not convert the path data to FEFF6.</p>
 
-<p>In Artemis use <b>File &gt; Import... &gt; a feff.inp file</b> and select the exported
-<code>feff.inp</code>. Keep the <code>feffNNNN.dat</code> files in the same directory.</p>
+<p>For Artemis 0.9.26, first run <code>ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1</code> once to expose
+the dormant external-FEFF importer, then restart Artemis. Use
+<b>File &gt; Import... &gt; an external Feff calculation</b> and select the exported
+<code>feff.inp</code>. Do not click <b>Run Feff</b>.</p>
 
 <h3>Scientific scope</h3>
 <p>Feff8L is an EXAFS engine and is not a replacement for full FEFF9 XANES calculations.
