@@ -43,6 +43,7 @@ Write-Host ""
 
 $artemis = Find-ArtemisFile "Demeter\UI\Artemis.pm"
 $import  = Find-ArtemisFile "Demeter\UI\Artemis\Import.pm"
+$external = Find-ArtemisFile "Demeter\Feff\External.pm"
 
 if (-not $artemis) {
     throw "Could not locate Demeter\UI\Artemis.pm. Re-run with -ArtemisRoot pointing to the Perl library root or Demeter installation."
@@ -50,13 +51,18 @@ if (-not $artemis) {
 if (-not $import) {
     throw "Could not locate Demeter\UI\Artemis\Import.pm. Re-run with -ArtemisRoot pointing to the Perl library root or Demeter installation."
 }
+if (-not $external) {
+    throw "Could not locate Demeter\Feff\External.pm. Re-run with -ArtemisRoot pointing to the Perl library root or Demeter installation."
+}
 
 Write-Host "Artemis.pm: $artemis"
 Write-Host "Import.pm:  $import"
+Write-Host "External.pm: $external"
 
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
 Copy-Item $artemis "$artemis.openexafs_backup_$stamp" -Force
 Copy-Item $import  "$import.openexafs_backup_$stamp" -Force
+Copy-Item $external "$external.openexafs_backup_$stamp" -Force
 
 $artemisText = Get-Content $artemis -Raw
 $oldMenu = '#$importmenu->Append($IMPORT_FEFF,     "an external Feff calculation",  "Import a Feff input file and the results of a calculation already made with that file");'
@@ -82,6 +88,32 @@ if ($importText.Contains($needle) -and -not $importText.Contains('eval "require 
     Write-Host "Added the runtime load for Demeter::Feff::External." -ForegroundColor Green
 } else {
     Write-Host "External module load is already present or this build loads it elsewhere." -ForegroundColor Green
+}
+
+$externalText = Get-Content $external -Raw
+$oldComplete = @'
+  return ( $self->npaths
+	   and $self->filesdat and (-e $self->filesdat) and (-r $self->filesdat)
+	   and $self->phasebin and (-e $self->phasebin) and (-r $self->phasebin)
+	 );
+'@
+$newComplete = @'
+  # OpenEXAFS Studio compatibility: current Feff8L path calculations may not
+  # produce the legacy phase.bin file.  Artemis fitting uses the imported
+  # feffNNNN.dat scattering-path files, so require those plus files.dat.
+  return ( $self->npaths
+	   and $self->filesdat and (-e $self->filesdat) and (-r $self->filesdat)
+	 );
+'@
+
+if ($externalText.Contains($oldComplete)) {
+    $externalText = $externalText.Replace($oldComplete, $newComplete)
+    Set-Content -Path $external -Value $externalText -Encoding UTF8
+    Write-Host "Relaxed legacy phase.bin requirement for Feff8L external paths." -ForegroundColor Green
+} elseif ($externalText.Contains("OpenEXAFS Studio compatibility")) {
+    Write-Host "Feff8L phase.bin compatibility patch is already present." -ForegroundColor Green
+} else {
+    throw "Expected is_complete() block was not found in External.pm. The installed Demeter source differs from 0.9.26."
 }
 
 Write-Host ""
