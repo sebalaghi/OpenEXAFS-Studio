@@ -90,23 +90,53 @@ if ($importText.Contains($needle) -and -not $importText.Contains('eval "require 
     Write-Host "External module load is already present or this build loads it elsewhere." -ForegroundColor Green
 }
 
-# Demeter 0.9.26 creates the external Feff object and description page, but its
-# _external_feff() routine does not populate the Paths table.  The same
-# fill_ss_page() call is used elsewhere in Artemis after restoring/importing Feff.
+# Demeter 0.9.26's normal fill_intrp_page() ranks paths and can call FEFF again.
+# For an external Feff8L calculation we must not do that.  Instead, populate the
+# visible Artemis Paths list directly from the ScatteringPath objects already
+# created from feffNNNN.dat by Demeter::Feff::External.
 $importText = Get-Content $import -Raw
-$fillNeedle = '  $rframes->{$fnum}->{Feff}->fill_intrp_page($efeff);'
-$fillLine   = '  $rframes->{$fnum}->{Feff}->fill_ss_page($efeff);'
-if ($importText.Contains($fillNeedle) -and -not $importText.Contains($fillNeedle + [Environment]::NewLine + $fillLine)) {
+
+$oldFill = '  $rframes->{$fnum}->{Feff}->fill_intrp_page($efeff);'
+$newFill = @'
+  # OpenEXAFS Studio: show externally generated Feff8L paths without ranking
+  # or rerunning FEFF.  Demeter::Feff::External has already parsed each
+  # feffNNNN.dat into a ScatteringPath object at this point.
+  $rframes->{$fnum}->{Feff}->fill_intrp_page($efeff);
+  if (ref($efeff) =~ m{External}) {
+    my $plist = $rframes->{$fnum}->{Paths}->{paths};
+    $plist->DeleteAllItems;
+    my $i = 1;
+    foreach my $p (@{$efeff->pathlist}) {
+      $p->pathfinder_index($i);
+      my $idx = $plist->InsertImageStringItem($i, sprintf("%3d", $i), 0);
+      $plist->SetItemData($idx, $i);
+      $plist->SetItem($idx, 1, sprintf("%.2f", $p->n));
+      $plist->SetItem($idx, 2, sprintf("%.3f", $p->fuzzy));
+      $plist->SetItem($idx, 3, $p->intrplist);
+      $plist->SetItem($idx, 4, q{external});
+      $plist->SetItem($idx, 5, $p->nleg);
+      $plist->SetItem($idx, 6, $p->Type);
+      ++$i;
+    }
+  };
+'@
+
+if ($importText.Contains($oldFill)) {
+    # Remove any previous OpenEXAFS fill_ss_page line that may have been added.
     $importText = $importText.Replace(
-        $fillNeedle,
-        $fillNeedle + [Environment]::NewLine + $fillLine
+        $oldFill + [Environment]::NewLine + '  $rframes->{$fnum}->{Feff}->fill_ss_page($efeff);',
+        $oldFill
     )
+    # Replace only the occurrence inside _external_feff by using the last occurrence.
+    $pos = $importText.LastIndexOf($oldFill)
+    if ($pos -lt 0) { throw "Could not locate external fill_intrp_page() call." }
+    $importText = $importText.Substring(0, $pos) + $newFill + $importText.Substring($pos + $oldFill.Length)
     Set-Content -Path $import -Value $importText -Encoding UTF8
-    Write-Host "Enabled population of the Artemis Paths table for external Feff calculations." -ForegroundColor Green
-} elseif ($importText.Contains($fillLine)) {
-    Write-Host "External Feff Paths-table population patch is already present." -ForegroundColor Green
+    Write-Host "Patched external FEFF import to populate the Paths table directly from feffNNNN.dat." -ForegroundColor Green
+} elseif ($importText.Contains("OpenEXAFS Studio: show externally generated Feff8L paths")) {
+    Write-Host "External FEFF8 Paths-table patch is already present." -ForegroundColor Green
 } else {
-    throw "Could not locate the external-Feff fill_intrp_page() call in Import.pm."
+    throw "Could not locate the external fill_intrp_page() call in Import.pm."
 }
 
 $externalText = Get-Content $external -Raw
