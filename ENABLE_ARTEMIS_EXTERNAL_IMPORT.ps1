@@ -44,6 +44,7 @@ Write-Host ""
 $artemis = Find-ArtemisFile "Demeter\UI\Artemis.pm"
 $import  = Find-ArtemisFile "Demeter\UI\Artemis\Import.pm"
 $external = Find-ArtemisFile "Demeter\Feff\External.pm"
+$pathsui  = Find-ArtemisFile "Demeter\UI\Atoms\Paths.pm"
 
 if (-not $artemis) {
     throw "Could not locate Demeter\UI\Artemis.pm. Re-run with -ArtemisRoot pointing to the Perl library root or Demeter installation."
@@ -54,15 +55,20 @@ if (-not $import) {
 if (-not $external) {
     throw "Could not locate Demeter\Feff\External.pm. Re-run with -ArtemisRoot pointing to the Perl library root or Demeter installation."
 }
+if (-not $pathsui) {
+    throw "Could not locate Demeter\UI\Atoms\Paths.pm. Re-run with -ArtemisRoot pointing to the Perl library root or Demeter installation."
+}
 
 Write-Host "Artemis.pm: $artemis"
 Write-Host "Import.pm:  $import"
 Write-Host "External.pm: $external"
+Write-Host "Paths.pm:    $pathsui"
 
 $stamp = Get-Date -Format "yyyyMMdd_HHmmss"
 Copy-Item $artemis "$artemis.openexafs_backup_$stamp" -Force
 Copy-Item $import  "$import.openexafs_backup_$stamp" -Force
 Copy-Item $external "$external.openexafs_backup_$stamp" -Force
+Copy-Item $pathsui "$pathsui.openexafs_backup_$stamp" -Force
 
 $artemisText = Get-Content $artemis -Raw
 $oldMenu = '#$importmenu->Append($IMPORT_FEFF,     "an external Feff calculation",  "Import a Feff input file and the results of a calculation already made with that file");'
@@ -167,6 +173,44 @@ if ($externalText.Contains($oldComplete)) {
     Write-Host "Feff8L phase.bin compatibility patch is already present." -ForegroundColor Green
 } else {
     throw "Expected is_complete() block was not found in External.pm. The installed Demeter source differs from 0.9.26."
+}
+
+
+# OpenEXAFS Studio compatibility for plotting externally generated FEFF8 paths.
+# The stock Artemis path plotter passes sp=>$sp, which can trigger FEFF again
+# because the external path file is not in the Artemis workspace.  Plot the
+# original feffNNNN.dat directly instead.
+$pathsText = Get-Content $pathsui -Raw
+
+if (-not $pathsText.Contains('use File::Basename qw(dirname basename);')) {
+    $pathsText = $pathsText.Replace(
+        'use File::Spec;',
+        'use File::Spec;' + [Environment]::NewLine + 'use File::Basename qw(dirname basename);'
+    )
+}
+
+$oldPlotLine = '    Demeter::Path -> new(parent=>$feff, sp=>$sp, name=>$sp->intrplist) -> plot($space);'
+$newPlotBlock = @'
+    if (($feff->source || q{}) eq 'external' and $sp->fromnnnn and -e $sp->fromnnnn) {
+      Demeter::Path -> new(
+        parent => $feff,
+        folder => dirname($sp->fromnnnn),
+        file   => basename($sp->fromnnnn),
+        name   => $sp->intrplist,
+      ) -> plot($space);
+    } else {
+      Demeter::Path -> new(parent=>$feff, sp=>$sp, name=>$sp->intrplist) -> plot($space);
+    };
+'@
+
+if ($pathsText.Contains($oldPlotLine)) {
+    $pathsText = $pathsText.Replace($oldPlotLine, $newPlotBlock)
+    Set-Content -Path $pathsui -Value $pathsText -Encoding UTF8
+    Write-Host "Patched Artemis raw-path plotting to use external feffNNNN.dat directly." -ForegroundColor Green
+} elseif ($pathsText.Contains('folder => dirname($sp->fromnnnn)')) {
+    Write-Host "External FEFF8 plotting patch is already present." -ForegroundColor Green
+} else {
+    throw "Could not locate the raw path plotting line in Paths.pm."
 }
 
 Write-Host ""
