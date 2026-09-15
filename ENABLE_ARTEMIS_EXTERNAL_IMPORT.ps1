@@ -101,8 +101,10 @@ $newFill = @'
   # OpenEXAFS Studio: show externally generated Feff8L paths without ranking
   # or rerunning FEFF.  Demeter::Feff::External has already parsed each
   # feffNNNN.dat into a ScatteringPath object at this point.
-  $rframes->{$fnum}->{Feff}->fill_intrp_page($efeff);
   if (ref($efeff) =~ m{External}) {
+    $rframes->{$fnum}->make_page('Paths') if not $rframes->{$fnum}->{Paths};
+    $rframes->{$fnum}->{Paths}->{name}->SetValue($efeff->name);
+    $rframes->{$fnum}->{Paths}->{header}->SetValue($efeff->intrp_header);
     my $plist = $rframes->{$fnum}->{Paths}->{paths};
     $plist->DeleteAllItems;
     my $i = 1;
@@ -118,6 +120,8 @@ $newFill = @'
       $plist->SetItem($idx, 6, $p->Type);
       ++$i;
     }
+  } else {
+    $rframes->{$fnum}->{Feff}->fill_intrp_page($efeff);
   };
 '@
 
