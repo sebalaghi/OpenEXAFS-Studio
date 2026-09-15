@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openexafs-studio"
-version = "0.2.1"
-description = "Professional open-source EXAFS GUI using XrayLarch and the Feff8L engine"
+version = "0.3.0"
+description = "FEFF8L path generator and Artemis export GUI built on XrayLarch"
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
 license = {text = "MIT"}
 authors = [{name = "S. Esmael Balaghi"}]
-keywords = ["EXAFS", "XAS", "XrayLarch", "FEFF", "Feff8L", "FEFFIT"]
+keywords = ["EXAFS", "XAS", "XrayLarch", "FEFF", "Feff8L", "Artemis"]
 classifiers = [
   "Programming Language :: Python :: 3",
   "License :: OSI Approved :: MIT License",
