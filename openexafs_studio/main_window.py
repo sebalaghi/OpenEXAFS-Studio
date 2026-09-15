@@ -487,7 +487,7 @@ class MainWindow(QMainWindow):
         instructions = QTextBrowser()
         instructions.setHtml(
             "<ol>"
-            "<li>Run <code>ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1</code> once on the Artemis PC, then restart Artemis.</li>"
+            "<li>Run the latest <code>ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1</code> once on the Artemis PC, then restart Artemis. It also handles Feff8L runs without legacy <code>phase.bin</code>.</li>"
             "<li>Export the Artemis folder or ZIP below; extract the ZIP if needed.</li>"
             "<li>In Artemis choose <b>File &gt; Import... &gt; an external Feff calculation</b>.</li>"
             "<li>Select the exported <code>feff.inp</code> and accept the external-FEFF warning.</li>"
