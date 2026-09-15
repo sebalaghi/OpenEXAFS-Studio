@@ -382,29 +382,44 @@ class OpenFeffEngine:
 
     def validate_artemis_run(self) -> tuple[bool, str]:
         inp = self.run_dir / "feff.inp"
+        phase = self.run_dir / "phase.bin"
         paths = sorted(self.run_dir.glob("feff[0-9][0-9][0-9][0-9].dat"))
         if not inp.is_file():
             return False, "Missing feff.inp."
+        if not phase.is_file():
+            return False, "Missing phase.bin, which Artemis external-FEFF import requires."
         if not paths:
             return False, "No feffNNNN.dat scattering-path files were found."
-        return True, f"Artemis-ready FEFF8 package: feff.inp plus {len(paths)} path files."
+        return True, f"External-Artemis package ready: feff.inp, phase.bin, and {len(paths)} FEFF8 path files."
+
+    def _synthetic_files_dat(self) -> str:
+        paths = sorted(self.run_dir.glob("feff[0-9][0-9][0-9][0-9].dat"))
+        lines = [
+            "# files.dat compatibility index written by OpenEXAFS Studio",
+            "# filename        sig2   amp_ratio",
+        ]
+        for path in paths:
+            lines.append(f"{path.name:<16s}  0.0000  0.0000")
+        return "\n".join(lines) + "\n"
 
     def _artemis_readme(self) -> str:
         ok, status = self.validate_artemis_run()
         return (
-            "OpenEXAFS Studio - Artemis FEFF8 package\n"
-            "=========================================\n\n"
+            "OpenEXAFS Studio - Artemis external FEFF8 package\n"
+            "==================================================\n\n"
             f"{status}\n\n"
-            "Import into Artemis:\n"
-            "1. Extract this ZIP to a normal local folder.\n"
-            "2. In Artemis choose File > Import > a feff.inp file.\n"
-            "3. Select feff.inp from this folder.\n"
-            "4. Keep the feffNNNN.dat files in the same folder.\n\n"
-            "The scattering-path files are the original Feff8L outputs. They are not "
-            "converted to FEFF6 and are not recalculated by OpenEXAFS Studio.\n\n"
-            "If your Artemis build does not reconstruct the full calculation from the "
-            "input file, the feffNNNN.dat files can still be used as externally generated "
-            "FEFF scattering-path files.\n"
+            "IMPORTANT: Do NOT import this with Artemis' normal 'a feff.inp file' route "
+            "and do not click 'Run Feff'. That creates an Artemis-managed FEFF calculation.\n\n"
+            "Artemis 0.9.26 contains an external-FEFF importer, but its menu item is disabled "
+            "in the distributed GUI. The OpenEXAFS Studio repository includes "
+            "ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1 to expose that existing importer.\n\n"
+            "After enabling it and restarting Artemis:\n"
+            "1. File > Import... > an external Feff calculation.\n"
+            "2. Select feff.inp from this folder.\n"
+            "3. Accept the Artemis warning about external FEFF calculations.\n"
+            "4. Artemis should build its path list from the existing feffNNNN.dat files.\n\n"
+            "The feffNNNN.dat files are the original Feff8L outputs. OpenEXAFS Studio does "
+            "not convert them to FEFF6 and does not ask Artemis to recalculate them.\n"
         )
 
     def export_artemis_zip(self, output: str | Path) -> Path:
@@ -418,8 +433,12 @@ class OpenFeffEngine:
         output.parent.mkdir(parents=True, exist_ok=True)
 
         with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as zf:
+            names = set()
             for path in self.artemis_files():
                 zf.write(path, arcname=path.name)
+                names.add(path.name.lower())
+            if "files.dat" not in names:
+                zf.writestr("files.dat", self._synthetic_files_dat())
             zf.writestr("ARTEMIS_IMPORT.txt", self._artemis_readme())
         return output
 
@@ -430,7 +449,11 @@ class OpenFeffEngine:
 
         destination = Path(destination).expanduser().resolve()
         destination.mkdir(parents=True, exist_ok=True)
+        copied = set()
         for path in self.artemis_files():
             shutil.copy2(path, destination / path.name)
+            copied.add(path.name.lower())
+        if "files.dat" not in copied:
+            (destination / "files.dat").write_text(self._synthetic_files_dat(), encoding="utf-8")
         (destination / "ARTEMIS_IMPORT.txt").write_text(self._artemis_readme(), encoding="utf-8")
         return destination
