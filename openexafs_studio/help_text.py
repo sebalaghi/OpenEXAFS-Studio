@@ -26,10 +26,18 @@ Fourier-transform components. Preview parameters are for visualization only.</p>
 the original Feff8L <code>feff.inp</code>, available FEFF metadata files, and all
 <code>feffNNNN.dat</code> files. OpenEXAFS Studio does not convert the path data to FEFF6.</p>
 
-<p>For Artemis 0.9.26, first run <code>ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1</code> once to expose
-the dormant external-FEFF importer, then restart Artemis. Use
-<b>File &gt; Import... &gt; an external Feff calculation</b> and select the exported
-<code>feff.inp</code>. Do not click <b>Run Feff</b>.</p>
+<p><b>Artemis 0.9.26, first-time setup:</b> close Artemis and run
+<code>powershell -ExecutionPolicy Bypass -File .\ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1</code>
+from the OpenEXAFS Studio repository, then restart Artemis.</p>
+
+<p><b>Import:</b> use <b>File &gt; Import... &gt; an external Feff calculation</b>,
+select the exported <code>feff.inp</code>, accept the warning, and open the
+<b>Paths</b> tab. Do not use <b>a feffit.inp file</b> and do not click
+<b>Run Feff</b> for the imported FEFF8L calculation.</p>
+
+<p>If the path table is empty or plotting hangs, update the repository with
+<code>git pull</code>, re-run the compatibility patch with Artemis closed, restart Artemis,
+and import the external calculation again.</p>
 
 <h3>Scientific scope</h3>
 <p>Feff8L is an EXAFS engine and is not a replacement for full FEFF9 XANES calculations.
