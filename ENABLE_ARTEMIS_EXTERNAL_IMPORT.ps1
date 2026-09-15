@@ -90,6 +90,25 @@ if ($importText.Contains($needle) -and -not $importText.Contains('eval "require 
     Write-Host "External module load is already present or this build loads it elsewhere." -ForegroundColor Green
 }
 
+# Demeter 0.9.26 creates the external Feff object and description page, but its
+# _external_feff() routine does not populate the Paths table.  The same
+# fill_ss_page() call is used elsewhere in Artemis after restoring/importing Feff.
+$importText = Get-Content $import -Raw
+$fillNeedle = '  $rframes->{$fnum}->{Feff}->fill_intrp_page($efeff);'
+$fillLine   = '  $rframes->{$fnum}->{Feff}->fill_ss_page($efeff);'
+if ($importText.Contains($fillNeedle) -and -not $importText.Contains($fillNeedle + [Environment]::NewLine + $fillLine)) {
+    $importText = $importText.Replace(
+        $fillNeedle,
+        $fillNeedle + [Environment]::NewLine + $fillLine
+    )
+    Set-Content -Path $import -Value $importText -Encoding UTF8
+    Write-Host "Enabled population of the Artemis Paths table for external Feff calculations." -ForegroundColor Green
+} elseif ($importText.Contains($fillLine)) {
+    Write-Host "External Feff Paths-table population patch is already present." -ForegroundColor Green
+} else {
+    throw "Could not locate the external-Feff fill_intrp_page() call in Import.pm."
+}
+
 $externalText = Get-Content $external -Raw
 $oldComplete = @'
   return ( $self->npaths
