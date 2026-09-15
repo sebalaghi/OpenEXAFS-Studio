@@ -487,11 +487,11 @@ class MainWindow(QMainWindow):
         instructions = QTextBrowser()
         instructions.setHtml(
             "<ol>"
-            "<li>Export the Artemis folder or ZIP below.</li>"
-            "<li>If ZIP is used, extract it.</li>"
-            "<li>In Artemis choose <b>File &gt; Import... &gt; a feff.inp file</b>.</li>"
-            "<li>Select the exported <code>feff.inp</code>.</li>"
-            "<li>Keep all <code>feffNNNN.dat</code> files in the same directory.</li>"
+            "<li>Run <code>ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1</code> once on the Artemis PC, then restart Artemis.</li>"
+            "<li>Export the Artemis folder or ZIP below; extract the ZIP if needed.</li>"
+            "<li>In Artemis choose <b>File &gt; Import... &gt; an external Feff calculation</b>.</li>"
+            "<li>Select the exported <code>feff.inp</code> and accept the external-FEFF warning.</li>"
+            "<li>Do not click <b>Run Feff</b>; Artemis should use the existing FEFF8 path files.</li>"
             "</ol>"
         )
         iv.addWidget(instructions)
