@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openexafs-studio"
-version = "0.3.0"
+version = "0.3.1"
 description = "FEFF8L path generator and Artemis export GUI built on XrayLarch"
 readme = "README.md"
 requires-python = ">=3.11,<3.15"
