@@ -39,6 +39,23 @@ No separate Python installation is required. The portable package also includes 
 - Export an **Artemis FEFF8 folder** or **Artemis FEFF8 ZIP**
 - Preserve the original Feff8L path files without converting them to FEFF6
 
+
+### Windows says it cannot access the EXE
+
+Because the portable build is currently **not code-signed**, Windows may attach a Mark-of-the-Web flag to the downloaded ZIP and propagate it to extracted files.
+
+Preferred fix:
+
+1. Right-click the downloaded `OpenEXAFS-Studio-Windows-x64.zip`.
+2. Choose **Properties**.
+3. Tick **Unblock** if shown, then click **Apply**.
+4. Extract the ZIP again into a new folder.
+5. Run `OpenEXAFS-Studio.exe`.
+
+The portable package also contains `UNBLOCK_AND_RUN.bat`. If the ZIP was already extracted, run that helper once. It removes the Internet-zone flag from files in the portable folder and starts OpenEXAFS Studio.
+
+If Windows Defender has quarantined the EXE, check **Windows Security -> Virus & threat protection -> Protection history** before retrying.
+
 ## Artemis workflow
 
 After running Feff8L, use the **Artemis export** page.
