@@ -9,6 +9,23 @@ Artemis.
 The project intentionally does **not** implement its own EXAFS fitting page. Quantitative fitting is
 left to Artemis or another dedicated EXAFS fitting environment.
 
+## Windows EXE
+
+Prefer not to install Python? A portable Windows build is generated automatically from the repository.
+
+[**Download the latest Windows EXE package from Releases**](https://github.com/sebalaghi/OpenEXAFS-Studio/releases/latest)
+
+Download `OpenEXAFS-Studio-Windows-x64.zip`, extract it, and double-click:
+
+```text
+OpenEXAFS-Studio.exe
+```
+
+No separate Python installation is required. The portable package also includes the Artemis compatibility patch.
+
+![OpenEXAFS Studio Windows GUI](docs/assets/openexafs-studio-windows.png)
+
+
 ## What it does
 
 - Load CIF and other crystal structures supported by Larch/pymatgen
