@@ -1,11 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_all
+from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 datas = []
 binaries = []
 hiddenimports = []
 
-for package in ("larch", "larixite", "pymatgen", "xraydb", "lmfit", "asteval"):
+for package in ("larch", "larixite", "pymatgen", "xraydb", "lmfit", "asteval", "fabio"):
     try:
         d, b, h = collect_all(package)
         datas += d
@@ -13,6 +13,13 @@ for package in ("larch", "larixite", "pymatgen", "xraydb", "lmfit", "asteval"):
         hiddenimports += h
     except Exception:
         pass
+
+# Fabio image readers are imported dynamically (for example fabio.pilatusimage),
+# so PyInstaller cannot discover them reliably from static imports.
+try:
+    hiddenimports += collect_submodules("fabio")
+except Exception:
+    pass
 
 a = Analysis(
     ["launch.py"],
