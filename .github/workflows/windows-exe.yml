@@ -77,21 +77,6 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: Commit refreshed screenshots
-        shell: pwsh
-        continue-on-error: true
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/assets/openexafs-studio-gui.png docs/assets/openexafs-studio-windows.png
-          git diff --cached --quiet
-          if ($LASTEXITCODE -ne 0) {
-            git commit -m "docs: refresh GUI screenshots [skip ci]"
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
-          }
-
       - name: Publish Windows download release
         shell: pwsh
         env:
@@ -104,4 +89,3 @@ jobs:
             gh release create $tag --target "${{ github.sha }}" --title "OpenEXAFS Studio $tag" --notes "Windows portable build of OpenEXAFS Studio. Download the ZIP, extract it, and double-click OpenEXAFS-Studio.exe. No Python installation is required."
           }
           gh release upload $tag OpenEXAFS-Studio-Windows-x64.zip --clobber
-          gh release upload $tag docs/assets/openexafs-studio-windows.png --clobber
