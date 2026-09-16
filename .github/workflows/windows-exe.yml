@@ -1,0 +1,100 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "openexafs_studio/**"
+      - "examples/**"
+      - "launch.py"
+      - "pyproject.toml"
+      - "OpenEXAFS-Studio.spec"
+      - "tools/capture_gui.py"
+      - "ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1"
+      - ".github/workflows/windows-exe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install application and build tools
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+          pip install pyinstaller pillow
+
+      - name: Generate real GUI screenshots
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          python tools/capture_gui.py
+
+      - name: Build portable Windows application
+        shell: pwsh
+        run: |
+          pyinstaller --noconfirm --clean OpenEXAFS-Studio.spec
+
+      - name: Add user-facing files
+        shell: pwsh
+        run: |
+          Copy-Item LICENSE dist\OpenEXAFS-Studio\LICENSE.txt
+          Copy-Item README.md dist\OpenEXAFS-Studio\README.md
+          Copy-Item ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1 dist\OpenEXAFS-Studio\ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1
+
+      - name: Create portable ZIP
+        shell: pwsh
+        run: |
+          $zip = "OpenEXAFS-Studio-Windows-x64.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path dist\OpenEXAFS-Studio\* -DestinationPath $zip -CompressionLevel Optimal
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenEXAFS-Studio-Windows-x64
+          path: OpenEXAFS-Studio-Windows-x64.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Commit refreshed screenshots
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/assets/openexafs-studio-gui.png docs/assets/openexafs-studio-windows.png
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "docs: refresh GUI screenshots [skip ci]"
+            git push origin HEAD:main
+          }
+
+      - name: Publish Windows download release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = python -c "import tomllib; print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])"
+          $tag = "v$version"
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --target "${{ github.sha }}" --title "OpenEXAFS Studio $tag" --notes "Windows portable build of OpenEXAFS Studio. Download the ZIP, extract it, and double-click OpenEXAFS-Studio.exe. No Python installation is required."
+          }
+          gh release upload $tag OpenEXAFS-Studio-Windows-x64.zip --clobber
+          gh release upload $tag docs/assets/openexafs-studio-windows.png --clobber
