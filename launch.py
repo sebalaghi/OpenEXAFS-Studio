@@ -10,6 +10,18 @@ import traceback
 ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 LOG = ROOT / "OpenEXAFS_launch_error.log"
 
+# PyInstaller windowed applications start with sys.stdout/sys.stderr set to None.
+# XrayLarch's FeffRunner writes progress messages to sys.stdout, so provide
+# harmless sinks in the frozen Windows build instead of letting FeffRunner crash.
+_DEVNULL_HANDLES = []
+if getattr(sys, "frozen", False):
+    if sys.stdout is None:
+        _DEVNULL_HANDLES.append(open(os.devnull, "w", encoding="utf-8"))
+        sys.stdout = _DEVNULL_HANDLES[-1]
+    if sys.stderr is None:
+        _DEVNULL_HANDLES.append(open(os.devnull, "w", encoding="utf-8"))
+        sys.stderr = _DEVNULL_HANDLES[-1]
+
 
 def show_native_error(title: str, message: str) -> None:
     """Show an error even when Python/Qt fails before QApplication exists."""
