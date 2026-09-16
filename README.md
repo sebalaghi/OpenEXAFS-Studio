@@ -14,7 +14,7 @@ left to Artemis or another dedicated EXAFS fitting environment.
 Prefer not to install Python? A portable Windows build is generated automatically from the repository.
 
 [**Download the latest Windows EXE package from Releases**](https://github.com/sebalaghi/OpenEXAFS-Studio/releases/latest)  
-[**Direct download: Windows x64 ZIP**](https://github.com/sebalaghi/OpenEXAFS-Studio/releases/download/v0.3.0/OpenEXAFS-Studio-Windows-x64.zip)
+[**Direct download: Windows x64 ZIP**](https://github.com/sebalaghi/OpenEXAFS-Studio/releases/latest/download/OpenEXAFS-Studio-Windows-x64.zip)
 
 Download `OpenEXAFS-Studio-Windows-x64.zip`, extract it, and double-click:
 
@@ -24,7 +24,7 @@ OpenEXAFS-Studio.exe
 
 No separate Python installation is required. The portable package also includes the Artemis compatibility patch.
 
-![OpenEXAFS Studio Windows GUI](docs/assets/openexafs-studio-overview.svg)
+![OpenEXAFS Studio Windows GUI](Untitled.png)
 
 
 ## What it does
