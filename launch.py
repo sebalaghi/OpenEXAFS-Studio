@@ -7,7 +7,7 @@ import sys
 import traceback
 
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent
 LOG = ROOT / "OpenEXAFS_launch_error.log"
 
 
