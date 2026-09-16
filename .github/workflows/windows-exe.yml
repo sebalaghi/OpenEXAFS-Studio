@@ -61,6 +61,7 @@ jobs:
           Copy-Item LICENSE dist\OpenEXAFS-Studio\LICENSE.txt
           Copy-Item README.md dist\OpenEXAFS-Studio\README.md
           Copy-Item ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1 dist\OpenEXAFS-Studio\ENABLE_ARTEMIS_EXTERNAL_IMPORT.ps1
+          Copy-Item UNBLOCK_AND_RUN.bat dist\OpenEXAFS-Studio\UNBLOCK_AND_RUN.bat
 
       - name: Create portable ZIP
         shell: pwsh
