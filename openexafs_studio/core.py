@@ -207,7 +207,7 @@ class OpenFeffEngine:
 
     def run_feff8l(self, input_text: str | None = None, verbose: bool = False) -> list[PathRecord]:
         require_larch()
-        from larch.xafs import feff8l, feffrunner
+        from larch.xafs import feff8l
 
         if input_text is not None:
             self.save_feff_input(input_text)
@@ -217,11 +217,12 @@ class OpenFeffEngine:
 
         previous = Path.cwd()
         try:
-            try:
-                feff8l(folder=str(self.run_dir), feffinp="feff.inp", verbose=verbose)
-            except Exception:
-                runner = feffrunner(feffinp=inp, verbose=verbose)
-                runner.run()
+            # Keep FeffRunner quiet in the desktop application.  XrayLarch's verbose
+            # writer uses sys.stdout, which is intentionally absent in a windowed
+            # PyInstaller executable.  feff8l() already runs the complete FEFF8L
+            # module chain, so a second FeffRunner fallback is unnecessary and can
+            # leave feffrun_*.log locked after a failed first attempt on Windows.
+            feff8l(folder=str(self.run_dir), feffinp="feff.inp", verbose=False)
         except Exception as exc:
             raise OpenEXAFSError(
                 "Feff8L did not run successfully. Confirm that XrayLarch contains the "
